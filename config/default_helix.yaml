@@ -1,0 +1,279 @@
+# ================================================================
+# AXIAL-MODE HELICAL ANTENNA — MODIFIED REQUIREMENT CONFIGURATION
+# Architecture: Python/PyAEDT → AEDT → HFSS FEM → Results
+# Target: 3.035 GHz, 3-turn RHCP axial-mode helix
+# ================================================================
+
+
+# ----------------------------------------------------------------
+# PROJECT
+# ----------------------------------------------------------------
+project:
+  name: Helical_Antenna
+  design: Helical_3GHz
+  model_units: mm
+  solution_type: DrivenModal
+  work_dir: work
+  results_dir: results
+
+
+# ----------------------------------------------------------------
+# ANTENNA
+# ----------------------------------------------------------------
+# Physical dimensions are taken directly from the modified
+# requirement specification.
+# ----------------------------------------------------------------
+antenna:
+
+  # Operating frequency
+  frequency_ghz: 3.035
+
+  # Axial-mode operation
+  mode: axial
+
+  # Required polarization
+  polarization: rhcp
+
+  # --------------------------------------------------------------
+  # NUMBER OF TURNS
+  # --------------------------------------------------------------
+  turns: 3.0
+
+  # --------------------------------------------------------------
+  # HELIX GEOMETRY
+  # --------------------------------------------------------------
+  # Required centerline radius = 20.94 mm
+  # Therefore diameter = 41.88 mm
+  helix_diameter_mm: 41.88
+
+  pitch_mm: 37.20
+
+  # --------------------------------------------------------------
+  # WIRE
+  # --------------------------------------------------------------
+  # 18 AWG
+  # Diameter ≈ 1.024 mm
+  # Radius ≈ 0.512 mm
+  wire_diameter_mm: 1.024
+
+  # --------------------------------------------------------------
+  # GROUND PLANE
+  # --------------------------------------------------------------
+  # Required ground-plane diameter = 112.59 mm
+  # Therefore radius = 56.295 mm
+  #
+  # The current repository geometry generator represents this
+  # value as the ground box side length.
+  #
+  # Use 112.59 mm here for the current Student-safe geometry.
+  ground_size_mm: 112.59
+
+  # --------------------------------------------------------------
+  # MATERIALS
+  # --------------------------------------------------------------
+  conductor_material: copper
+  ground_material: copper
+
+  # --------------------------------------------------------------
+  # IMPORTANT:
+  # Physical dimensions above are used directly.
+  # The following normalized synthesis parameters are intentionally
+  # not used because diameter, pitch and wire dimensions are
+  # explicitly specified in mm.
+  # --------------------------------------------------------------
+  circumference_over_lambda: null
+  pitch_angle_deg: null
+  wire_diameter_over_lambda: null
+  ground_size_over_lambda: null
+
+
+# ----------------------------------------------------------------
+# FEED
+# ----------------------------------------------------------------
+feed:
+
+  # Student-safe feed
+  type: lumped_port
+
+  port_name: Port1
+
+  # Standard 50-ohm excitation
+  port_impedance_ohm: 50.0
+
+  # --------------------------------------------------------------
+  # IMPEDANCE MATCHING
+  # --------------------------------------------------------------
+  #
+  # IMPORTANT:
+  # The old 2.15 nH / 0.28 pF values were optimized for the
+  # previous 6-turn geometry and should NOT be assumed optimal
+  # for this new 3-turn geometry.
+  #
+  # Start the new geometry WITHOUT the old matching network.
+  # After the first FEM solve, tune the matching components based
+  # on the actual HFSS impedance/S11 response.
+  # --------------------------------------------------------------
+  enable_impedance_match: true
+
+  match_l_nh: 5.11
+  match_c_pf: 0.80
+
+  # --------------------------------------------------------------
+  # FEED GEOMETRY
+  # --------------------------------------------------------------
+  pin_height_over_lambda: 0.05
+  feeder_length_over_lambda: 0.15
+  coax_inner_over_lambda: 0.006
+  coax_outer_over_lambda: 0.02
+
+  dielectric_material: Teflon (tm)
+
+
+# ----------------------------------------------------------------
+# BOUNDARY
+# ----------------------------------------------------------------
+boundary:
+
+  type: Radiation
+
+  # Radiation boundary padding
+  padding_over_lambda: 0.12
+
+  # Additional axial clearance
+  extra_axial_padding_over_lambda: 0.08
+
+  infinite_sphere: InfiniteSphere1
+
+  theta_start: 0
+  theta_stop: 180
+  theta_step: 5
+
+  phi_start: -180
+  phi_stop: 180
+  phi_step: 5
+
+
+# ----------------------------------------------------------------
+# MESH
+# ----------------------------------------------------------------
+mesh:
+
+  # Student Edition volume-tet limitation
+  slider_level: 1
+
+  # Maximum helix mesh element length
+  helix_max_length_over_lambda: 0.04
+
+  # Keep disabled for Student 2025.x
+  enable_length_mesh: false
+
+
+# ----------------------------------------------------------------
+# SOLVER
+# ----------------------------------------------------------------
+solver:
+
+  setup_name: Setup1
+  sweep_name: Sweep1
+
+  # Defaults to antenna.frequency_ghz
+  adaptive_frequency_ghz: null
+
+  maximum_passes: 4
+  minimum_passes: 1
+  minimum_converged_passes: 1
+
+  max_delta_s: 0.03
+
+  # Student-friendly interpolating sweep
+  sweep_type: Interpolating
+
+  # 0.85 × 3.035 GHz = 2.57975 GHz
+  sweep_start_scale: 0.85
+
+  # 1.15 × 3.035 GHz = 3.49025 GHz
+  sweep_stop_scale: 1.15
+
+  sweep_points: 51
+
+  # Radiation fields required for gain/directivity/AR
+  save_fields: false
+  save_rad_fields: true
+
+  cores: 2
+
+  # Leave final Analyze All operation to HFSS GUI
+  analyze_all: false
+
+  generate_mesh: true
+
+
+# ----------------------------------------------------------------
+# SESSION
+# ----------------------------------------------------------------
+session:
+
+  # Student Edition requires visible AEDT
+  non_graphical: false
+
+  # Attach to existing Student session when possible
+  new_desktop: false
+
+  # Keep AEDT open after Python finishes
+  close_on_exit: false
+
+  # null = automatically use available Student installation
+  specified_version: null
+
+  # --------------------------------------------------------------
+  # HELIX GEOMETRY METHOD
+  # --------------------------------------------------------------
+  #
+  # false = Student-safe polyline implementation
+  # true  = UDP helix implementation
+  #
+  # Keep false initially because the repository specifically notes
+  # that UDP can hang after a Student rebuild.
+  # --------------------------------------------------------------
+  use_udp_helix: false
+
+  auto_open_dashboard: false
+
+  # Rebuild geometry from this configuration
+  rebuild_design: true
+
+  admin_mode: false
+
+  # Open S11, VSWR, Gain, AR and Directivity plots in HFSS
+  show_plots_in_ansys: true
+
+  student_version: true
+
+
+# ----------------------------------------------------------------
+# VALIDATION
+# ----------------------------------------------------------------
+# These are the engineering acceptance checks.
+# ----------------------------------------------------------------
+validation:
+
+  # Required S11 should be deeper than -20 dB
+  s11_max_db: -20.0
+
+  # Target resonance
+  resonance_ghz: 3.035
+
+  # ±5 MHz tolerance
+  resonance_tol_ghz: 0.005
+
+  # VSWR acceptance
+  vswr_max: 2.0
+
+  # Minimum acceptable gain
+  gain_min_dbi: 8.0
+
+  # Maximum acceptable axial ratio
+  axial_ratio_max_db: 3.0
+
+  # All validation criteria must pass
+  require_all: true

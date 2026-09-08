@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+
+# AEDT / HFSS working files
+work/
+*.aedt
+*.aedtz
+*.aedb
+*.asol
+*.lock
+*.log
+*.aedtresults/
+
+# Generated reports (keep folder)
+results/*
+!results/.gitkeep
+!results/README.md
